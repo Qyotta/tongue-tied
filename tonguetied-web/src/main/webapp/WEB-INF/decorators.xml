@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<decorators defaultdir="/WEB-INF/jsp/decorators/">
+    <excludes>
+        <pattern>/error*</pattern>
+        <pattern>/accessDenied*</pattern>
+        <pattern>/login*</pattern>
+        <pattern>/logout*</pattern>
+    </excludes>
+
+    <decorator name="public" page="decorator.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+</decorators>
+

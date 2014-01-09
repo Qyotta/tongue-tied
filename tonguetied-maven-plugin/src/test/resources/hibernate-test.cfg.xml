@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC 
+    "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+    "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.show_sql">true</property>
+        <property name="hibernate.hbm2ddl.auto">create-drop</property>
+        <property name="hibernate.connection.autocommit">true</property>
+        <property name="hibernate.cache.use_second_level_cache">false</property>
+        <property name="hibernate.cache.use_query_cache">false</property>
+        <!-- need to manually add all persistable classes -->
+        <mapping class="org.tonguetied.administration.ServerData" />
+        <mapping class="org.tonguetied.audit.AuditLogRecord" />
+        <mapping class="org.tonguetied.keywordmanagement.Bundle" />
+        <mapping class="org.tonguetied.keywordmanagement.Country" />
+        <mapping class="org.tonguetied.keywordmanagement.Keyword" />
+        <mapping class="org.tonguetied.keywordmanagement.Language" />
+        <mapping class="org.tonguetied.keywordmanagement.Translation" />
+        <mapping class="org.tonguetied.usermanagement.User" />
+        <mapping class="org.tonguetied.usermanagement.UserRight" />
+    </session-factory>
+</hibernate-configuration>

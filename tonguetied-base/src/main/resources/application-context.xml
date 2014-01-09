@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <!-- ======================= GENERAL DEFINITIONS ======================= -->
+
+
+    <!-- Configurer that replaces ${...} placeholders with values from properties files -->
+    <!-- (JDBC related properties) -->
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreResourceNotFound" value="true" />
+        <property name="locations">
+            <list>
+                <value>WEB-INF/database.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basenames">
+            <list>
+                <value>tonguetied</value>
+                <value>language</value>
+                <value>classpath:/org/springframework/security/messages</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- ======================= RESOURCE DEFINITIONS ====================== -->
+
+    <!-- the transactional advice (what 'happens'; see the <aop:advisor/> bean below) -->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <!-- the transactional semantics... -->
+        <tx:attributes>
+            <!-- all methods starting with 'get' are read-only -->
+            <tx:method name="get*" read-only="true" />
+            <!-- other methods use the default transaction settings (see below) -->
+            <tx:method name="*" />
+        </tx:attributes>
+    </tx:advice>
+
+    <!-- ensure that the above transactional advice runs for any execution
+    of an operation defined by the KeywordService interface -->
+    <aop:config>
+        <aop:pointcut id="keywordServiceMethods" expression="execution(* org.tonguetied.keywordmanagement.*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="keywordServiceMethods" />
+    </aop:config>
+
+    <!-- ensure that the above transactional advice runs for any execution
+    of an operation defined by the UserService interface -->
+    <aop:config>
+        <aop:pointcut id="userServiceMethods" expression="execution(* org.tonguetied.usermanagement.*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="userServiceMethods" />
+    </aop:config>
+
+    <!-- ensure that the above transactional advice runs for any execution
+    of an operation defined by the DataService interface -->
+    <aop:config>
+        <aop:pointcut id="dataServiceMethods" expression="execution(* org.tonguetied.datatransfer.*.*(..))" />
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="dataServiceMethods" />
+    </aop:config>
+
+    <!-- Local DataSource that works in any environment -->
+
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName" value="java:comp/env/jdbc/tonguetied" />
+        <property name="resourceRef" value="true" />
+    </bean>
+
+    <!-- Hibernate SessionFactory -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+
+        <property name="configLocation">
+            <value>classpath:hibernate.cfg.xml</value>
+        </property>
+
+        <property name="configurationClass">
+            <value>org.hibernate.cfg.AnnotationConfiguration</value>
+        </property>
+
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</prop>
+            </props>
+        </property>
+
+        <property name="eventListeners">
+            <map>
+                <entry key="merge">
+                    <bean class="org.springframework.orm.hibernate3.support.IdTransferringMergeEventListener" />
+                </entry>
+                <entry key="post-delete">
+                    <bean class="org.tonguetied.audit.AuditLogPostDeleteEventListener" />
+                </entry>
+                <entry key="post-insert">
+                    <bean class="org.tonguetied.audit.AuditLogPostInsertEventListener" />
+                </entry>
+                <entry key="post-update">
+                    <bean class="org.tonguetied.audit.AuditLogPostUpdateEventListener" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <!-- Transaction manager for a single Hibernate SessionFactory (alternative to JTA) -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+
+    <!-- ================================= DAO ============================= -->
+
+    <bean id="serverDataRepository" class="org.tonguetied.administration.ServerDataRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="auditRepository" class="org.tonguetied.audit.AuditRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="bundleRepository" class="org.tonguetied.keywordmanagement.BundleRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="countryRepository" class="org.tonguetied.keywordmanagement.CountryRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="keywordRepository" class="org.tonguetied.keywordmanagement.KeywordRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="languageRepository" class="org.tonguetied.keywordmanagement.LanguageRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="transferRepository" class="org.tonguetied.datatransfer.dao.TransferRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    <bean id="userRepository" class="org.tonguetied.usermanagement.UserRepositoryImpl">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+
+    <bean id="schemaDao" class="org.tonguetied.administration.SchemaDaoImpl">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+    <bean name="openSessionInViewInterceptor" class="org.springframework.orm.hibernate3.support.OpenSessionInViewInterceptor">
+        <property name="sessionFactory" ref="sessionFactory" />
+        <property name="flushModeName" value="FLUSH_AUTO" />
+    </bean>
+
+    <bean id="keywordService" autowire="byName" dependency-check="objects" class="org.tonguetied.keywordmanagement.KeywordServiceImpl" />
+
+    <bean id="userService" autowire="byName" dependency-check="objects" class="org.tonguetied.usermanagement.UserServiceImpl" />
+
+    <bean id="dataService" dependency-check="objects" class="org.tonguetied.datatransfer.DataServiceImpl" init-method="init">
+        <property name="transferRepository" ref="transferRepository" />
+        <property name="keywordService" ref="keywordService" />
+        <property name="exporterFactory" ref="exporterFactory" />
+        <property name="importerFactory" ref="importerFactory" />
+    </bean>
+    
+    <bean id="exporterFactory" class="org.tonguetied.datatransfer.exporting.ExporterFactory">
+        <property name="exporters">
+            <map>
+                <entry key="JAVA_PROPERTIES">
+                    <bean class="org.tonguetied.datatransfer.exporting.FreemarkerResourceExporter" parent="freemarkerExporterParent">
+                        <property name="templateName" value="properties.ftl" />
+                    </bean>
+                </entry>
+                <entry key="NLS_PROPERTIES">
+                    <bean class="org.tonguetied.datatransfer.exporting.FreemarkerResourceExporter" parent="freemarkerExporterParent">
+                        <property name="templateName" value="nls.ftl" />
+                    </bean>
+                </entry>
+                <entry key="CSV">
+                    <bean class="org.tonguetied.datatransfer.exporting.FreemarkerExporter" parent="freemarkerExporterParent">
+                        <property name="templateName" value="csv.ftl" />
+                    </bean>
+                </entry>
+                <entry key="XLS">
+                    <bean class="org.tonguetied.datatransfer.exporting.FreemarkerExporter" parent="freemarkerExporterParent">
+                        <property name="templateName" value="xls.ftl" />
+                    </bean>
+                </entry>
+                <entry key="XLS_LANGUAGE">
+                    <bean class="org.tonguetied.datatransfer.exporting.FreemarkerLanguageCentricExporter" parent="freemarkerExporterParent">
+                        <property name="keywordService" ref="keywordService" />
+                        <property name="templateName" value="xlsLanguage.ftl" />
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+        
+    <bean id="freemarkerExporterParent" class="org.tonguetied.datatransfer.exporting.FreemarkerExporter" abstract="true">
+        <property name="configuration" ref="freemarkerConfiguration" />
+        <property name="outputEncoding" value="UTF-8" />
+        <property name="customDirectives">
+            <map>
+                <entry key="native2ascii">
+                    <bean class="org.tonguetied.datatransfer.exporting.Native2AsciiDirective" />
+                </entry>
+                <entry key="native2nlsascii">
+                    <bean class="org.tonguetied.datatransfer.exporting.Native2NlsAsciiDirective" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="freemarkerConfiguration" class="org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean">
+        <property name="templateLoaderPath" value="classpath:templates/" />
+    </bean>
+
+    <bean id="importerFactory" class="org.tonguetied.datatransfer.importing.ImporterFactory">
+        <property name="importers">
+            <map>
+                <entry key="JAVA_PROPERTIES">
+                    <bean class="org.tonguetied.datatransfer.importing.JavaPropertiesImporter" parent="importerParent" />
+                </entry>
+                <entry key="CSV">
+                    <bean class="org.tonguetied.datatransfer.importing.CsvImporter" parent="importerParent" />
+                </entry>
+                <entry key="XLS">
+                    <bean class="org.tonguetied.datatransfer.importing.ExcelImporter" parent="importerParent">
+                        <property name="transferRepository" ref="transferRepository" />
+                        <property name="parser">
+                            <bean class="org.tonguetied.datatransfer.importing.ExcelKeywordParser">
+                                <property name="keywordService" ref="keywordService" />
+                            </bean>
+                        </property>
+                    </bean>
+                </entry>
+                <entry key="XLS_LANGUAGE">
+                    <bean class="org.tonguetied.datatransfer.importing.ExcelImporter" parent="importerParent">
+                        <property name="transferRepository" ref="transferRepository" />
+                        <property name="parser">
+                            <bean class="org.tonguetied.datatransfer.importing.ExcelLanguageCentricParser">
+                                <property name="keywordService" ref="keywordService" />
+                            </bean>
+                        </property>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="importerParent" class="org.tonguetied.datatransfer.importing.AbstractImporter" abstract="true">
+        <property name="keywordService" ref="keywordService" />
+    </bean>
+    
+    <bean id="auditService" autowire="byName" dependency-check="objects" class="org.tonguetied.audit.AuditServiceImpl" />
+
+    <bean id="administrationService" autowire="byName" dependency-check="objects" class="org.tonguetied.administration.AdministrationServiceImpl" />
+
+    <!-- ============================== Encryption ========================= -->
+
+    <bean id="passwordEncoder" class="org.springframework.security.providers.encoding.ShaPasswordEncoder">
+        <constructor-arg value="256" />
+    </bean>
+</beans>

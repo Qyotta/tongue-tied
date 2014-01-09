@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<MenuConfig>
+    <Displayers>
+        <Displayer name="TabbedMenu" type="net.sf.navigator.displayer.TabbedMenuDisplayer"/>
+        <Displayer name="Velocity" type="net.sf.navigator.displayer.VelocityMenuDisplayer"/>
+    </Displayers>
+
+    <Menus>
+        <!-- New Menu for Tabbed Displayer -->
+        <!-- No location, uses first item's location (People) -->
+        <Menu name="TabbedKeywords" title="keywords.tab" page="/keywords.htm" toolTip="help.keywords.tab">
+            <Item name="KeywordList" title="keywords" page="/keywords.htm" toolTip="help.keywords.sub.menu"/>
+            <Item name="NewKeywordByLanguage" title="new.keyword.by.language" page="/keyword.htm?creationType=language" toolTip="help.new.keyword.by.language.sub.menu" roles="ROLE_ADMIN,ROLE_USER,ROLE_DEV"/>
+            <Item name="NewKeywordByCountry" title="new.keyword.by.country" page="/keyword.htm?creationType=country" toolTip="help.new.keyword.by.country.sub.menu" roles="ROLE_ADMIN,ROLE_USER,ROLE_DEV"/>
+        </Menu>
+        <Menu name="TabbedCountries" title="countries.tab" page="/countries.htm" toolTip="help.countries.tab" roles="ROLE_ADMIN,ROLE_DEV">
+            <Item name="CountryList" title="countries" page="/countries.htm" toolTip="help.countries.sub.menu"/>
+            <Item name="NewCountry" title="new.country" page="/country.htm" toolTip="help.new.country.sub.menu"/>
+        </Menu>
+        <Menu name="TabbedLanguages" title="languages.tab" page="/languages.htm" toolTip="help.languages.tab" roles="ROLE_ADMIN,ROLE_DEV">
+            <Item name="LanguageList" title="languages" page="/languages.htm" toolTip="help.languages.sub.menu"/>
+            <Item name="NewLanguage" title="new.language" page="/language.htm" toolTip="help.new.language.sub.menu"/>
+        </Menu>
+        <Menu name="TabbedBundles" title="bundles.tab" page="/bundles.htm" toolTip="help.bundles.tab" roles="ROLE_ADMIN,ROLE_DEV">
+            <Item name="BundleList" title="bundles" page="/bundles.htm" toolTip="help.bundles.sub.menu"/>
+            <Item name="NewBundle" title="new.bundle" page="/bundle.htm" toolTip="help.new.bundle.sub.menu"/>
+        </Menu>
+        <Menu name="TabbedImportExport" title="import.export.tab" page="/export.htm" toolTip="help.import.export.tab">
+            <Item name="ExportList" title="export.listing" page="/export.dir" toolTip="help.export.listing.sub.menu"/>
+            <Item name="Export" title="export" page="/export.htm" toolTip="help.export.sub.menu"/>
+            <Item name="Import" title="import" page="/import.htm" toolTip="help.import.sub.menu" roles="ROLE_ADMIN,ROLE_USER,ROLE_DEV"/>
+        </Menu>
+        <Menu name="TabbedAccountManagement" title="account.management.tab" page="/accountDetails.htm" toolTip="help.account.management.tab">
+            <Item name="AccountDetails" title="account.details" page="/accountDetails.htm" toolTip="help.account.details.sub.menu"/>
+            <Item name="ChangePassword" title="change.password" page="/changePassword.htm" toolTip="help.change.password.sub.menu"/>
+        </Menu>
+        <Menu name="TabbedUsers" title="users.tab" toolTip="help.users.tab" page="/users.htm" roles="ROLE_ADMIN">
+            <Item name="UsersList" title="users" page="/users.htm" toolTip="help.users.sub.menu"/>
+            <Item name="NewUser" title="new.user" page="/user.htm" toolTip="help.new.user.sub.menu"/>
+        </Menu>
+        <Menu name="TabbedAuditLog" title="audit.tab" toolTip="help.audit.tab" page="/auditLog.htm" roles="ROLE_ADMIN,ROLE_DEV">
+            <Item name="AuditLog" title="audit.log" page="/auditLog.htm" toolTip="help.audit.log.sub.menu"/>
+        </Menu>
+    </Menus>
+</MenuConfig>

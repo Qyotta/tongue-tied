@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+                        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-2.0.xsd">
+
+    <http auto-config="false" access-denied-page="/accessDenied.jsp">
+        <intercept-url pattern="/images/*.ico" filters="none"/>
+        <intercept-url pattern="/images/*.png" filters="none"/>
+        <intercept-url pattern="/css/*.css" filters="none"/>
+        <intercept-url pattern="/login.*" filters="none"/>
+        <intercept-url pattern="/logout.jsp" filters="none"/>
+        <intercept-url pattern="/auditLog*.*" access="ROLE_ADMIN,ROLE_DEV"/>
+        <intercept-url pattern="/bundle*.*" access="ROLE_ADMIN,ROLE_DEV"/>
+        <intercept-url pattern="/country*.*" access="ROLE_ADMIN,ROLE_DEV"/>
+        <intercept-url pattern="/import.*" access="ROLE_ADMIN,ROLE_USER,ROLE_DEV"/>
+        <intercept-url pattern="/export.*" access="ROLE_ADMIN,ROLE_USER,ROLE_VERIFIER,ROLE_DEV"/>
+        <intercept-url pattern="/language*.*" access="ROLE_ADMIN,ROLE_DEV"/>
+        <intercept-url pattern="/deletekeyword.*" access="ROLE_ADMIN,ROLE_USER,ROLE_DEV"/>
+        <intercept-url pattern="/user*.*" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/resetPassword*.*" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/readOnlyUser*.*" access="ROLE_ADMIN"/>
+        <intercept-url pattern="/**" access="ROLE_USER,ROLE_ADMIN,ROLE_VERIFIER,ROLE_DEV"/>
+        <form-login login-page="/login.jsp" authentication-failure-url="/login.jsp?login_error=1"/>
+        <!-- concurrent-session-control max-sessions="1" exception-if-maximum-exceeded="false"/-->
+        <logout logout-success-url="/logout.jsp"/>
+        <remember-me user-service-ref="userDetailsService"/>
+    </http>
+    
+    <authentication-provider user-service-ref="userDetailsService">
+        <password-encoder ref="passwordEncoder">
+            <salt-source user-property="username"/>
+        </password-encoder>
+    </authentication-provider>
+    
+    <beans:bean id="userDetailsService" class="org.tonguetied.usermanagement.UserDetailsServiceImpl">
+        <beans:property name="userRepository" ref="userRepository"/>
+    </beans:bean>
+    
+    <!-- Automatically receives AuthenticationEvent messages -->
+    <beans:bean id="loggerListener" class="org.springframework.security.event.authentication.LoggerListener"/>
+</beans:beans>

@@ -1,0 +1,310 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  - DispatcherServlet application context for the Spring web MVC implementation
+  - of TongueTied's web tier.
+  - $Id: web-servlet.xml,v 1.22 2007/11/11 12:23:22 bsion Exp $
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+    <!-- ========================= MULTIPART RESOLVER ========================= -->
+
+    <!-- MultipartResolver for parsing file uploads, implementation for Commons FileUpload -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
+    
+    <!-- ========================= VIEW DEFINITIONS ========================= -->
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="viewClass" value="org.springframework.web.servlet.view.JstlView"/>
+        <property name="prefix" value="/WEB-INF/jsp/"/>
+        <property name="suffix" value=".jsp"/>
+        <property name="requestContextAttribute" value="rc"/>
+    </bean>
+
+    <!--
+    - We specify here that Locale and theme are stored in cookies.
+    - They could be stored in a Session. Default resolvers don't allow changing them on the fly.
+    -->
+    <bean id="localeResolver" class="org.springframework.web.servlet.i18n.CookieLocaleResolver">
+        <property name="cookieName" value="tongueTiedlanguage"/>
+        <property name="defaultLocale" value="en"/>
+        
+        <!-- The following line is a hack for Firefox. The max age does not 
+             appear to be resolved properly and the cookie is not created. In
+             Order for the cookie to be created in Firefox, the maxage needs to 
+             be set to something way in the future. A better solution to this 
+             needs to be found. -->
+        <property name="cookieMaxAge" value="1800000000"/>
+    </bean>
+
+    <!-- ========================= ERROR HANDLER  ========================= -->
+    <bean id="exceptionResolver" 
+        class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <property name="exceptionMappings">
+            <props>
+                <prop key="org.tonguetied.datatransfer.importing.ImportException">import/error</prop>
+                <prop key="javax.servlet.ServletException">error</prop>
+                <prop key="java.lang.Exception">error</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- ========================= DEFINITIONS OF PUBLIC CONTROLLERS ========================= -->
+    <bean id="defaultHandlerMapping" class="org.springframework.web.servlet.handler.BeanNameUrlHandlerMapping">
+        <property name="interceptors">
+            <list>
+                <ref bean="localeChangeInterceptor"/>
+                <ref bean="openSessionInViewInterceptor"/>
+            </list>
+        </property>
+    </bean>
+    
+    <bean name="/error.htm" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="error"/>
+    </bean>
+    
+    <bean name="/import/error.htm" class="org.springframework.web.servlet.mvc.ParameterizableViewController">
+        <property name="viewName" value="import/error"/>
+    </bean>
+    
+    <!-- ========================= DEFINITIONS OF PROTECTED CONTROLLERS ========================= -->
+
+    <bean id="secureHandlerMapping" class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="order" value="0"/>
+        <property name="interceptors">
+            <list>
+                <ref bean="localeChangeInterceptor"/>
+                <ref bean="openSessionInViewInterceptor"/>
+            </list>
+        </property>
+
+        <property name="urlMap">
+            <map>
+                <!-- Auditing -->
+                <entry key="/auditLog.htm" value-ref="mainController"/>
+                
+                <!-- Bundle -->
+                <entry key="/bundle.htm" value-ref="bundleController"/>
+                <entry key="/bundles.htm" value-ref="mainController"/>
+                <entry key="/deleteBundle.htm" value-ref="mainController"/>
+                
+                <!-- Country -->
+                <entry key="/country.htm" value-ref="countryController"/>
+                <entry key="/countries.htm" value-ref="mainController"/>
+                <entry key="/deleteCountry.htm" value-ref="mainController"/>
+                
+                <!-- Export -->
+                <entry key="/export.htm" value-ref="exportController"/>
+                <entry key="/import.htm" value-ref="importController"/>
+                <entry key="/export*.dir" value-ref="directoryViewController"/>
+                <entry key="/export/**/*.dir" value-ref="directoryViewController"/>
+                
+                <!-- Language -->
+                <entry key="/language.htm" value-ref="languageController"/>
+                <entry key="/languages.htm" value-ref="mainController"/>
+                <entry key="/deleteLanguage.htm" value-ref="mainController"/>
+                
+                <!-- Keyword -->
+                <entry key="/keyword.htm" value-ref="keywordController"/>
+                <entry key="/keywords.htm" value-ref="mainController"/>
+                <entry key="/keywordSearch.htm" value-ref="keywordSearchController"/>
+                <entry key="/preferences.htm" value-ref="preferenceController"/>
+                <entry key="/deleteKeyword.htm" value-ref="mainController"/>
+                
+                <!-- User -->
+                <entry key="/user.htm" value-ref="userController"/>
+                <entry key="/accountDetails.htm" value-ref="accountController"/>
+                <entry key="/users.htm" value-ref="mainController"/>
+                <entry key="/changePassword.htm" value-ref="changePasswordController"/>
+                <entry key="/userSearch.htm" value-ref="userSearchController"/>
+                <entry key="/readOnlyUser.htm" value-ref="readOnlyUserController"/>
+                <entry key="/resetPassword.htm" value-ref="resetPasswordController"/>
+            </map>
+        </property>
+    </bean>
+
+
+    <!-- ========================= BASE CONTROLLER ========================= -->
+    <!--
+        - Interceptors will pre-handle any request in this servlet, no matter which controller
+        - is mapped for a request.
+        -
+        - We use two built-in interceptors to detect user locale or theme change requests.
+        - The third interceptor is specific to this Demo. It allows views to easily be aware
+        - about the configuration detected. Precisely to know if a copy data to database can be
+        - proposed to the user.
+    -->
+    <bean id="localeChangeInterceptor" class="org.springframework.web.servlet.i18n.LocaleChangeInterceptor">
+        <property name="paramName" value="siteLanguage"/>
+    </bean>
+
+    <!-- =========================== CONTROLLERs =========================== -->
+
+    <bean name="mainController" class="org.tonguetied.web.MainController">
+        <property name="viewPreferences" ref="viewPreferences"/>
+        <property name="searchParameters" ref="searchParameters"/>
+        <property name="userSearch" ref="userSearch"/>
+        <property name="userService" ref="userService"/>
+        <property name="auditService" ref="auditService"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+
+    <bean name="bundleController" class="org.tonguetied.web.BundleController">
+        <property name="commandName" value="bundle"/>
+        <property name="formView" value="bundle/bundle"/>
+        <property name="validator" ref="bundleValidator"/>
+        <property name="successView" value="forward:/bundles.htm"/>
+        <property name="cancelView" value="forward:/bundles.htm"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+
+    <bean name="countryController" class="org.tonguetied.web.CountryController">
+        <property name="commandName" value="country"/>
+        <property name="formView" value="country/country"/>
+        <property name="validator" ref="countryValidator"/>
+        <property name="successView" value="forward:/countries.htm"/>
+        <property name="cancelView" value="forward:/countries.htm"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+
+    <bean name="languageController" class="org.tonguetied.web.LanguageController">
+        <property name="commandName" value="language"/>
+        <property name="formView" value="language/language"/>
+        <property name="validator" ref="languageValidator"/>
+        <property name="successView" value="forward:/languages.htm"/>
+        <property name="cancelView" value="forward:/languages.htm"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+
+    <bean name="exportController" class="org.tonguetied.web.ExportController">
+        <property name="commandName" value="export"/>
+        <property name="formView" value="export/export"/>
+        <property name="validator" ref="exportParametersValidator"/>
+        <property name="successView" value="forward:/export.dir"/>
+        <property name="cancelView" value="forward:/export.dir"/>
+        <property name="exportDir" value="export" />
+        <property name="dataService" ref="dataService"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+    
+    <bean name="importController" class="org.tonguetied.web.ImportController">
+        <property name="commandName" value="import"/>
+        <property name="formView" value="import/import"/>
+        <property name="successView" value="forward:/keywords.htm"/>
+        <property name="cancelView" value="forward:/export/"/>
+        <property name="dataService" ref="dataService"/>
+        <property name="keywordService" ref="keywordService"/>
+        <property name="validator" ref="importValidator"/>
+    </bean>
+
+    <bean name="keywordController" class="org.tonguetied.web.KeywordController">
+        <property name="sessionForm" value="true"/>
+        <property name="commandName" value="keyword"/>
+        <property name="validator" ref="keywordValidator"/>
+        <property name="formView" value="keyword/keyword"/>
+        <property name="successView" value="redirect:/keywords.htm"/>
+        <property name="cancelView" value="redirect:/keywords.htm"/>
+        <property name="keywordService" ref="keywordService"/>
+        <property name="viewPreferences" ref="viewPreferences"/>
+    </bean>
+
+    <bean name="keywordSearchController" class="org.tonguetied.web.KeywordSearchController">
+        <property name="commandName" value="searchParameters"/>
+        <property name="formView" value="keyword/keywords"/>
+        <property name="successView" value="forward:/keywords.htm"/>
+        <property name="searchParameters" ref="searchParameters"/>
+        <property name="viewPreferences" ref="viewPreferences"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+
+    <bean name="preferenceController" class="org.tonguetied.web.PreferenceController">
+        <property name="commandName" value="viewPreferences"/>
+        <property name="formView" value="keyword/keywords"/>
+        <property name="successView" value="forward:/keywords.htm"/>
+        <property name="viewPreferences" ref="viewPreferences"/>
+        <property name="keywordService" ref="keywordService"/>
+    </bean>
+
+    <bean name="userController" class="org.tonguetied.web.UserController">
+        <property name="commandName" value="userForm"/>
+        <property name="formView" value="user/user"/>
+        <property name="validator" ref="userValidator"/>
+        <property name="successView" value="redirect:/users.htm"/>
+        <property name="cancelView" value="forward:/users.htm"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <bean name="readOnlyUserController" class="org.tonguetied.web.UserController">
+        <property name="commandName" value="userForm"/>
+        <property name="formView" value="user/readOnlyUser"/>
+        <property name="cancelView" value="forward:/users.htm"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <bean name="userSearchController" class="org.tonguetied.web.UserSearchController">
+        <property name="commandName" value="userSearch"/>
+        <property name="formView" value="user/users"/>
+        <property name="successView" value="forward:/users.htm"/>
+        <property name="userSearch" ref="userSearch"/>
+    </bean>
+
+    <bean name="changePasswordController" class="org.tonguetied.web.ChangePasswordController">
+        <property name="commandName" value="changePasswordForm"/>
+        <property name="formView" value="user/changePassword"/>
+        <property name="validator" ref="changePasswordFormValidator"/>
+        <property name="successView" value="redirect:/accountDetails.htm"/>
+        <property name="cancelView" value="redirect:/accountDetails.htm"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <bean name="resetPasswordController" class="org.tonguetied.web.ResetPasswordController">
+        <property name="commandName" value="changePasswordForm"/>
+        <property name="formView" value="user/resetPassword"/>
+        <property name="validator" ref="changePasswordFormValidator"/>
+        <property name="successView" value="forward:/users.htm"/>
+        <property name="cancelView" value="forward:/users.htm"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <bean name="accountController" class="org.tonguetied.web.AccountController">
+        <property name="commandName" value="user"/>
+        <property name="formView" value="user/accountDetails"/>
+        <property name="validator" ref="accountFormValidator"/>
+        <property name="successView" value="user/accountDetails"/>
+        <property name="userService" ref="userService"/>
+    </bean>
+
+    <bean name="directoryViewController" class="org.tonguetied.web.DirectoryViewController">
+        <property name="suffix" value=".dir"/>
+    </bean>
+
+    <bean id="bundleValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.BundleValidator"/>
+    <bean id="countryValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.CountryValidator"/>
+    <bean id="keywordValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.KeywordValidator"/>
+    <bean id="languageValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.LanguageValidator"/>
+    <bean id="exportParametersValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.ExportParametersValidator"/>
+    <bean id="userValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.UserValidator"/>
+    <bean id="changePasswordFormValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.ChangePasswordFormValidator"/>
+    <bean id="accountFormValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.AccountFormValidator"/>
+    <bean id="importValidator" autowire="byName" dependency-check="objects" class="org.tonguetied.web.ImportValidator"/>
+
+    <bean name="viewPreferences" class="org.tonguetied.web.PreferenceForm" scope="session" init-method="init">
+        <aop:scoped-proxy/>
+    </bean>
+
+    <bean name="searchParameters" class="org.tonguetied.web.SearchForm" scope="session">
+        <aop:scoped-proxy/>
+    </bean>
+
+    <bean name="userSearch" class="org.tonguetied.usermanagement.User" scope="session">
+        <aop:scoped-proxy/>
+    </bean>
+
+    <bean id="menu" class="net.sf.navigator.menu.MenuLoader">
+        <property name="menuConfig" value="/WEB-INF/menu-config.xml"/> <!-- default and optional -->
+    </bean>
+</beans>

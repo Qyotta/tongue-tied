@@ -1,0 +1,468 @@
+@charset "ISO-8859-1";
+
+html, body {
+  margin: 0px;
+  padding: 0px;
+  background-color: #ffffff;
+  font-family: Verdana, Helvetica, Arial, sans-serif;
+  font-size:12px;
+}
+
+ul.inline {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+  text-align: center;
+}
+
+ul.inline li {
+  display: inline;
+}
+
+ul.inline li a {
+  padding: .2em .2em;
+  font-size: 12px;
+  font-weight: bold;
+/*  text-shadow: red 0.2em 0.3em 0.2em;*/
+  text-decoration: none;
+  color: #474747;
+}
+
+li.up-one-level {
+  list-style: none;
+  padding: 4px 0px 7px 0px;
+}
+
+li.file-item {
+  padding: 3px 10px 3px 20px;
+  list-style: none;
+}
+
+a.file-link {
+  background-image: url(../images/page_white.png);
+  background-repeat: no-repeat;
+  padding-bottom: 3px;
+  padding-left: 20px;
+}
+
+a[href$=".dir"].file-link {
+  background-image: url(../images/folder.png);
+}
+
+a[href$=".csv"].file-link {
+  background-image: url(../images/page_white_text.png);
+}
+
+a[href$=".properties"].file-link {
+  background-image: url(../images/page_white_text.png);
+}
+
+a[href$=".resx"].file-link {
+  background-image: url(../images/page_white_csharp.png);
+}
+
+a[href$=".xls"].file-link {
+  background-image: url(../images/page_white_excel.png);
+}
+
+a[href$=".zip"].file-link {
+  background-image: url(../images/page_white_zip.png);
+}
+
+.file-attributes {
+  float: right;
+  text-align: right;
+}
+
+/******************************************************************************
+* Styles for content layout.
+******************************************************************************/
+
+#left {
+  width: 230px;
+  float: left;
+  background: #ebebeb;
+}
+
+div.header-container {
+  width: 100%;
+  background: #DAECF3;
+  height: 70px;
+}
+
+div.left-element {
+  float: left;
+  width: 49%;
+}
+
+div.right-element {
+  float: right;
+  width: 49%;
+}
+
+div.sidepanel {
+  clear: both;
+}
+
+div.side-panel-header-bar {
+  clear: both;
+  text-align: right;
+  height: 2em;
+  border-width: 1.5px;
+  border-color: #ebebeb;
+  border-style: solid;
+  width: 99%;
+  background-color: #666666;
+  color: #cccccc;
+}
+
+div.side-panel-header-bar a {
+  float: right;
+  padding: 0;
+  vertical-align: top;
+}
+
+div.side-panel-header-bar a img {
+  padding: 0;
+  width: 2em;
+  height: 2em;
+}
+
+div.side-panel-header-bar div {
+  float: left;
+  text-align: left;
+  padding-left: 3px;
+  padding-top: 3px;
+}
+
+div.contentPanel {
+  margin-left: 230px;
+  position: relative;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+div.tabBody {
+  clear: both;
+  background: #ffffff;
+  margin: 0px;
+  padding-top: 15px;
+}
+
+div.tabBody div.content {
+  margin-top: 15px;
+}
+
+div.listing {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+div.pagefooter {
+  clear: both;
+  float: left;
+  border-style: none;
+  background: #DAECF3;
+  text-align: center;
+  width: 100%;
+  font-size: 75%;
+  padding-bottom: 15px;
+  padding-top: 15px;
+  border-top-color: #cccccc;
+  border-top-width: 1px;
+  border-top-style: solid;
+}
+
+div.submit {
+  float: right;
+}
+
+div.dir-breadcrumbs {
+  clear: both;
+  border-color: #cccccc;
+  border-width: 1px;
+  border-style: solid;
+  margin-right: 10px;
+  margin-left: 10px;
+  padding: 5px 3px;
+}
+
+div.dir-listing {
+  clear: both;
+  border-color: #cccccc;
+  border-width: 1px;
+  border-style: solid;
+  margin-right: 10px;
+  margin-left: 10px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 2px 10px;
+}
+
+div.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+/******************************************************************************
+* Styles for form display.
+******************************************************************************/
+
+form {
+  padding: 5px;
+  margin: 0 auto;
+}
+
+form.login {
+  max-width: 50em;
+}
+
+form fieldset {
+  display: block;
+  border: 1px dotted;
+  padding: 1px; 
+  margin-bottom: 0.5em;
+  line-height: 1.2em;
+}
+
+form.header {
+  display: inline;
+  float: right;
+}
+
+form fieldset.header {
+  display: inline;
+  border: none;
+  margin-bottom: 0pt;
+  padding: 0pt;
+}
+
+form fieldset#opt {
+  /*background:#ff6705;*/
+}
+
+form legend {
+  font-size: 14px;
+  font-weight: bold;
+  margin: 0 0 5px 10px;
+  height: 24px;
+  line-height: 24px;
+  width:157px;
+  border: 1px solid;
+  padding: 0 5px;
+  background-color: #ffffff;
+}
+
+form label {
+  clear: left; 
+  display: block; 
+  padding-right: 10px;
+  margin-bottom: 0.5em;
+}
+form label.content {
+  text-align: right;
+  float: left;
+  width: 200px;
+}
+
+span.contentLabel {
+  clear: left; 
+  display: block; 
+  padding-right: 10px;
+  margin-bottom: 0.5em;
+  text-align: right;
+  float: left;
+  width: 200px;
+}
+
+span.contentValue {
+  display: block; 
+  padding-right: 10px;
+  margin-bottom: 0.5em;
+  float: left;
+}
+
+form label.sidepanel {
+  text-align: left;
+  font-size: 12px;
+}
+
+form label.header {
+  display: inline;
+  text-align: left;
+}
+
+form input {
+  border: 1px solid;
+  border-color: #000000;
+  padding: 0 2px;
+  margin-bottom: 0.5em;
+}
+
+form select {
+  border: 1px solid;
+  border-color: #000000;
+  font-size: 12px;
+  margin-bottom: 0.5em;
+}
+
+form select.header {
+  display: inline;
+}
+
+form select.sidepanel {
+  width: 90%;
+}
+
+form textarea {
+  width: 95%;
+  height: auto;
+  border: 1px solid;
+  padding: 0.5em;
+  overflow: auto; 
+}
+
+form option {
+  color: #000;
+}
+
+form option.select {
+  font-style: italic;
+}
+
+form input.button {
+  font-weight: bold;
+  display: inline;
+  border: 1px solid;
+  text-align: center;
+}
+
+form input.button:hover {
+  color:#FF6705;
+}
+
+p {
+  margin: 4px 0;
+}
+
+form div.checkbox {
+  clear: both;
+  float: none;
+  position: relative;
+  display: block;
+}
+
+form div.checkbox label {
+  display: block;
+  margin-left: 20px;
+  font-size: 10px;
+}
+
+form div.checkbox input {
+  left: 0;
+  position: absolute;
+  top: 1px;
+  vertical-align: top;
+}
+
+/*
+form div.submit {
+  clear: both;
+  float: right;
+}
+*/
+
+input[type=checkbox] {
+  border: none;
+}
+
+input.keyword-entry {
+  width: 60%;
+}
+
+/******************************************************************************
+* Styles for heading display.
+******************************************************************************/
+
+h1 {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+h3 {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+h4.preference {
+  background: #FFFFFF;
+  font-size: 13px;
+  font-weight: normal;
+  padding: 1px 2px 1px 2px;
+}
+
+h4.message {
+  background: #99CC00;
+  text-align: center;
+  padding: 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+
+/******************************************************************************
+* Styles for hyperlinks display.
+******************************************************************************/
+
+a img.img-link {
+  border: 0;
+}
+
+/******************************************************************************
+* Styles for errors.
+******************************************************************************/
+
+.error {
+  color : #ff0000;
+}
+
+/******************************************************************************
+* Styles for images.
+******************************************************************************/
+.logo {
+  padding: 1.0em;
+}
+
+input.deleteImageButton {
+  border: 0;
+}
+
+/******************************************************************************
+* Styles for .
+******************************************************************************/
+.welcome {
+  font-weight: bold;
+}
+
+/******************************************************************************
+* Styles for tables.
+******************************************************************************/
+table.sublist {
+  margin: 0 0 0 0 !important;
+  font-size: 100%;
+  table-layout: fixed;
+  border: none;
+}
+
+td.sublist {
+  padding: 0 0 1px 0 !important;
+  width: 65%;
+}
+
+.sublist th.translation {
+  width: 30%;
+}
+
+.sublist th.state {
+  width: 10%;
+}
