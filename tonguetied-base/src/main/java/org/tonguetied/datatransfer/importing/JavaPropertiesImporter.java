@@ -17,9 +17,11 @@ package org.tonguetied.datatransfer.importing;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.List;
-import java.util.Properties;
 import java.util.Map.Entry;
+import java.util.Properties;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -27,13 +29,13 @@ import org.apache.commons.io.IOUtils;
 import org.tonguetied.datatransfer.importing.ImportException.ImportErrorCode;
 import org.tonguetied.keywordmanagement.Bundle;
 import org.tonguetied.keywordmanagement.Country;
+import org.tonguetied.keywordmanagement.Country.CountryCode;
 import org.tonguetied.keywordmanagement.Keyword;
 import org.tonguetied.keywordmanagement.Language;
-import org.tonguetied.keywordmanagement.Translation;
-import org.tonguetied.keywordmanagement.TranslationPredicate;
-import org.tonguetied.keywordmanagement.Country.CountryCode;
 import org.tonguetied.keywordmanagement.Language.LanguageCode;
+import org.tonguetied.keywordmanagement.Translation;
 import org.tonguetied.keywordmanagement.Translation.TranslationState;
+import org.tonguetied.keywordmanagement.TranslationPredicate;
 
 /**
  * Data importer that handles input in the Java resource or property file
@@ -49,12 +51,20 @@ public class JavaPropertiesImporter extends AbstractSingleResourceImporter {
     protected void doImport(final byte[] input, final TranslationState state) throws ImportException {
         ByteArrayInputStream bais = null;
         try {
-            // convert byte array into UTF-8 format rather than rely on the
-            // default string encoding for this JVM
-            final String inputString = new String(input, "UTF-8");
-            bais = new ByteArrayInputStream(inputString.getBytes());
+            bais = new ByteArrayInputStream(input);
             Properties properties = new Properties();
-            properties.load(bais);
+            
+            // convert values encoding into UTF-8 format rather than rely on the
+            // default string encoding for this JVM
+            
+            // http://stackoverflow.com/a/863854
+        	Reader reader = new InputStreamReader(bais, "UTF-8");
+        	try {
+        	  properties.load(reader);
+        	} finally {
+        	  reader.close();
+        	}
+        	
             Keyword keyword;
             Translation translation;
             String value;
