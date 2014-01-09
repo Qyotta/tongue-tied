@@ -64,9 +64,9 @@
     </aop:config>
 
     <!-- Local DataSource that works in any environment -->
-
+    <!-- Allod deployment of glassfish. Related to: http://stackoverflow.com/a/14250958 -->
     <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-        <property name="jndiName" value="java:comp/env/jdbc/tonguetied" />
+        <property name="jndiName" value="jdbc/tonguetied" />
         <property name="resourceRef" value="true" />
     </bean>
 
